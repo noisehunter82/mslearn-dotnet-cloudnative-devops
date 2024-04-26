@@ -62,7 +62,7 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       containers:
-        - image: [replace with your ACR name].azurecr.io/productservice:v1
+        - image: acseshop659102513.azurecr.io/productservice:v1
           name: productservice
           resources:
             requests:
