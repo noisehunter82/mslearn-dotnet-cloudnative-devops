@@ -1,0 +1,36 @@
+name: Build and deploy an app to AKS
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  # Local environment variables used later in the workflow
+  AZURE_CONTAINER_REGISTRY: 'acseshop659102513'
+  CONTAINER_NAME: 'productservice'
+  RESOURCE_GROUP: 'rg-eshop'
+  CLUSTER_NAME: 'aks-eshop'
+  DEPLOYMENT_MANIFEST_PATH: './product.yml'
+  DOCKER_PATH: './DockerfileProducts'
+
+jobs:
+  buildImage:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      # Checks out the repository this file is in
+      - uses: actions/checkout@v3
+
+      # Logs in with your Azure credentials stored in GitHub secrets
+      - name: Azure login
+        uses: azure/login@v1.4.6
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+
+      # Builds and pushes an image up to your Azure Container Registry
+      - name: Build and push image to ACR
+        run: |
+          az acr build --file ${{ env.DOCKER_PATH }} --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} .
